@@ -1,3 +1,4 @@
+import RootProviders from "@/providers/root";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { FC, PropsWithChildren } from "react";
@@ -14,7 +15,9 @@ const RootLayout: FC<PropsWithChildren> = (props) => {
   const { children } = props;
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>{children}</body>
+      <body className={`${inter.variable} antialiased`}>
+        <RootProviders>{children}</RootProviders>
+      </body>
     </html>
   );
 };
