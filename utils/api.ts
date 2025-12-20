@@ -1,4 +1,5 @@
 import { PlayerStats } from "@/models/api";
+import { PlayerStatsExtended } from "@/models/stats";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,8 +25,13 @@ const getPlayerStats = async (id: string): Promise<PlayerStats> => {
 
 const getPlayersStats = async (
   ids: string[],
-): Promise<PromiseSettledResult<PlayerStats>[]> => {
-  return Promise.allSettled(ids.map((id) => getPlayerStats(id)));
+): Promise<PromiseSettledResult<PlayerStatsExtended>[]> => {
+  return Promise.allSettled(
+    ids.map(async (id) => {
+      const stats = await getPlayerStats(id);
+      return { ...stats, id };
+    }),
+  );
 };
 
 export const API = {
