@@ -3,8 +3,14 @@
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { NullableStats, PlayerStatsExtended, Stats } from "@/models/stats";
 import { TeamKey, Teams } from "@/models/team";
-import type { FC, PropsWithChildren } from "react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import type { Dispatch, FC, PropsWithChildren, SetStateAction } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 
 const keys = {
   data: "ravionexia-data",
@@ -14,6 +20,8 @@ const keys = {
 type Props = PropsWithChildren;
 
 interface Context {
+  loading: boolean;
+  setLoading: Dispatch<SetStateAction<boolean>>;
   stats: NullableStats;
   setStats: (stats: PlayerStatsExtended[]) => void;
   teams: Teams;
@@ -27,6 +35,8 @@ const defaultTeams: Teams = {
 };
 
 const initialValue: Context = {
+  loading: false,
+  setLoading: () => null,
   stats: null,
   setStats: () => null,
   teams: defaultTeams,
@@ -38,11 +48,12 @@ const Context = createContext<Context>(initialValue);
 
 const DataProvider: FC<Props> = (props) => {
   const { children } = props;
-  const [stats, setStatsState] = useLocalStorage<NullableStats>({
+  const [loading, setLoading] = useState<boolean>(initialValue.loading);
+  const [stats, setStatsState] = useLocalStorage<Context["stats"]>({
     key: keys.data,
     defaultValue: initialValue.stats,
   });
-  const [teams, setTeamsState] = useLocalStorage<Teams>({
+  const [teams, setTeamsState] = useLocalStorage<Context["teams"]>({
     key: keys.teams,
     defaultValue: initialValue.teams,
   });
@@ -83,13 +94,15 @@ const DataProvider: FC<Props> = (props) => {
 
   const exposed = useMemo(() => {
     return {
+      loading,
+      setLoading,
       stats,
       setStats,
       teams,
       setPlayer,
       removePlayer,
     } satisfies Context;
-  }, [stats, setStats, teams, setPlayer, removePlayer]);
+  }, [loading, setLoading, stats, setStats, teams, setPlayer, removePlayer]);
 
   return <Context.Provider value={exposed}>{children}</Context.Provider>;
 };
